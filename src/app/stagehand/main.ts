@@ -119,8 +119,36 @@ async function mainLinkedIn({
             // Navigate to the LinkedIn profile
             await page.goto(message.linkedinUrl);
 
-            // Click on the Message button
-            await page.act("Click on the Message button, underneath the profile header");
+            // Give the profile time to load dynamic UI before interacting
+            await page.waitForTimeout(2000);
+
+            const primaryMessageButton = page
+                .locator('main button[aria-label^="Message"], main button:has-text("Message")')
+                .filter({ hasNot: page.locator('.msg-overlay-bubble-header__control') })
+                .first();
+
+            let clickedMessageButton = false;
+
+            try {
+                await primaryMessageButton.waitFor({ state: "visible", timeout: 10000 });
+                await primaryMessageButton.click();
+                clickedMessageButton = true;
+            } catch (error: any) {
+                console.error(`[LinkedIn Outreach] Failed to locate primary message button for ${message.linkedinUrl}`, error);
+            }
+
+            if (!clickedMessageButton) {
+                try {
+                    await page.act("Click on the Message button underneath the profile header, not the compose button in the bottom-right corner");
+                    clickedMessageButton = true;
+                } catch (fallbackError: any) {
+                    console.error(`[LinkedIn Outreach] Fallback click attempt failed for ${message.linkedinUrl}`, fallbackError);
+                    continue;
+                }
+            }
+
+            // Allow the messaging drawer to open before typing
+            await page.waitForTimeout(1000);
 
             // Input the message
             await page.act(`Type "${message.body}" into the message input field`);
