@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
 import { Navigation } from "@/components/navigation";
 import { motion } from "framer-motion";
+import { Moon, Sun } from "lucide-react";
 
 // Create a motion variant of Card
 const MotionCard = motion(Card);
@@ -23,18 +24,19 @@ export default function ProfilePage() {
     clubs: "",
     societies: "",
     location: "",
-    dreamCompany: ""
+    dreamCompany: "",
   });
   const [isSaved, setIsSaved] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
 
   // Animation variants
   const cardAnimationVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5, ease: "easeOut" }
-    }
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
   };
 
   const universities = [
@@ -138,14 +140,14 @@ export default function ProfilePage() {
     "Villanova University",
     "Wake Forest University",
     "Washington University in St. Louis",
-    "Yale University"
+    "Yale University",
   ];
 
   // Handle input changes for all fields
   const handleInputChange = (field: string, value: string) => {
-    setProfileData(prev => ({
+    setProfileData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
 
     // Reset saved state when any field changes
@@ -171,164 +173,202 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div
+      className={`flex flex-col min-h-screen transition-colors ${
+        darkMode ? "bg-black text-white" : "bg-background"
+      }`}
+    >
       <Navigation />
 
-      {/* Profile Page Content */}
-      <div className="flex items-center justify-center flex-1 p-6">
-        <div className="w-full max-w-4xl">
-          {/* Profile Form Card */}
-          <MotionCard 
-            className="w-full border-border/50 shadow-sm"
-            initial="hidden"
-            animate="visible"
-            variants={cardAnimationVariants}
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+        {/* Header row – matches dashboard layout */}
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">
+              Your Profile
+            </h1>
+            <p className="text-muted-foreground">
+              Customize your profile to help personalize our search
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setDarkMode(!darkMode)}
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
           >
-            <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl">Your Profile</CardTitle>
-              <CardDescription>
-                Customize your profile to help personalize our search
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Name */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Full Name
-                </label>
-                <Input
-                  placeholder="Your name"
-                  value={profileData.fullName}
-                  onChange={(e) => handleInputChange("fullName", e.target.value)}
-                />
-              </div>
-
-              {/* University Selection */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  University
-                </label>
-                <Select
-                  value={profileData.university}
-                  onValueChange={(value) => handleInputChange("university", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your university" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {universities.map((uni) => (
-                      <SelectItem key={uni} value={uni}>
-                        {uni}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Grade */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Year
-                </label>
-                <Select
-                  value={profileData.year}
-                  onValueChange={(value) => handleInputChange("year", value)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select your year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="freshman">Freshman</SelectItem>
-                    <SelectItem value="sophomore">Sophomore</SelectItem>
-                    <SelectItem value="junior">Junior</SelectItem>
-                    <SelectItem value="senior">Senior</SelectItem>
-                    <SelectItem value="graduate">Graduate Student</SelectItem>
-                    <SelectItem value="alumni">Alumni</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Major */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Major
-                </label>
-                <Input
-                  placeholder="Your field of study (e.g. Computer Science, Business Administration)"
-                  value={profileData.major}
-                  onChange={(e) => handleInputChange("major", e.target.value)}
-                />
-              </div>
-
-              <Separator className="my-2" />
-
-              {/* University Clubs */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  University Clubs
-                </label>
-                <Textarea
-                  placeholder="List the clubs you're involved with (e.g. Computer Science Club, Chess Club)"
-                  className="min-h-[80px] resize-none"
-                  value={profileData.clubs}
-                  onChange={(e) => handleInputChange("clubs", e.target.value)}
-                />
-              </div>
-
-              {/* University Societies */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  University Societies
-                </label>
-                <Textarea
-                  placeholder="List the societies you're a part of (e.g. Honor Society, Professional Fraternities)"
-                  className="min-h-[80px] resize-none"
-                  value={profileData.societies}
-                  onChange={(e) => handleInputChange("societies", e.target.value)}
-                />
-              </div>
-
-              {/* Location */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Location
-                </label>
-                <Input
-                  placeholder="Your current location (e.g. Los Angeles, CA)"
-                  value={profileData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
-                />
-              </div>
-
-              {/* Dream Company */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                  Dream Company
-                </label>
-                <Input
-                  placeholder="Company you'd love to work for (e.g. Google, Microsoft, Deloitte)"
-                  value={profileData.dreamCompany}
-                  onChange={(e) => handleInputChange("dreamCompany", e.target.value)}
-                />
-              </div>
-
-              <Button
-                className="w-full mt-4"
-                onClick={saveProfile}
-              >
-                {isSaved ? "Profile Saved ✓" : "Save Profile"}
-              </Button>
-
-              {isSaved && (
-                <p className="text-sm text-green-600 text-center mt-2">
-                  Your profile has been saved successfully!
-                </p>
-              )}
-            </CardContent>
-          </MotionCard>
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{darkMode ? "Light mode" : "Dark mode"}</span>
+          </button>
         </div>
-      </div>
+
+        {/* Profile Page Content */}
+        <div className="flex justify-center">
+          <div className="w-full max-w-4xl">
+            {/* Profile Form Card */}
+            <MotionCard
+              className="w-full border-border/50 shadow-sm"
+              initial="hidden"
+              animate="visible"
+              variants={cardAnimationVariants}
+            >
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-2xl">Profile details</CardTitle>
+                <CardDescription>
+                  Fill in your information so we can tailor connections to you
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-6">
+                {/* Name */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Full Name
+                  </label>
+                  <Input
+                    placeholder="Your name"
+                    value={profileData.fullName}
+                    onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  />
+                </div>
+
+                {/* University Selection */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    University
+                  </label>
+                  <Select
+                    value={profileData.university}
+                    onValueChange={(value) =>
+                      handleInputChange("university", value)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select your university" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {universities.map((uni) => (
+                        <SelectItem key={uni} value={uni}>
+                          {uni}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Grade */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Year
+                  </label>
+                  <Select
+                    value={profileData.year}
+                    onValueChange={(value) => handleInputChange("year", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select your year" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="freshman">Freshman</SelectItem>
+                      <SelectItem value="sophomore">Sophomore</SelectItem>
+                      <SelectItem value="junior">Junior</SelectItem>
+                      <SelectItem value="senior">Senior</SelectItem>
+                      <SelectItem value="graduate">Graduate Student</SelectItem>
+                      <SelectItem value="alumni">Alumni</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Major */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Major
+                  </label>
+                  <Input
+                    placeholder="Your field of study (e.g. Computer Science, Business Administration)"
+                    value={profileData.major}
+                    onChange={(e) => handleInputChange("major", e.target.value)}
+                  />
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* University Clubs */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    University Clubs
+                  </label>
+                  <Textarea
+                    placeholder="List the clubs you're involved with (e.g. Computer Science Club, Chess Club)"
+                    className="min-h-[80px] resize-none"
+                    value={profileData.clubs}
+                    onChange={(e) =>
+                      handleInputChange("clubs", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* University Societies */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    University Societies
+                  </label>
+                  <Textarea
+                    placeholder="List the societies you're a part of (e.g. Honor Society, Professional Fraternities)"
+                    className="min-h-[80px] resize-none"
+                    value={profileData.societies}
+                    onChange={(e) =>
+                      handleInputChange("societies", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Location */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Location
+                  </label>
+                  <Input
+                    placeholder="Your current location (e.g. Los Angeles, CA)"
+                    value={profileData.location}
+                    onChange={(e) =>
+                      handleInputChange("location", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Dream Company */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Dream Company
+                  </label>
+                  <Input
+                    placeholder="Company you'd love to work for (e.g. Google, Microsoft, Deloitte)"
+                    value={profileData.dreamCompany}
+                    onChange={(e) =>
+                      handleInputChange("dreamCompany", e.target.value)
+                    }
+                  />
+                </div>
+
+                <Button className="w-full mt-4" onClick={saveProfile}>
+                  {isSaved ? "Profile Saved ✓" : "Save Profile"}
+                </Button>
+
+                {isSaved && (
+                  <p
+                    className={`text-sm text-center mt-2 ${
+                      darkMode ? "text-green-400" : "text-green-600"
+                    }`}
+                  >
+                    Your profile has been saved successfully!
+                  </p>
+                )}
+              </CardContent>
+            </MotionCard>
+          </div>
+        </div>
+      </main>
     </div>
   );
-} 
+}
