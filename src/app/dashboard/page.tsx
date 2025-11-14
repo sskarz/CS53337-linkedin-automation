@@ -12,7 +12,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import Link from "next/link";
 import { ContactProfile, mockProfiles, outreachMetrics, uniqueCompanies } from "./data";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Filter } from "lucide-react";
+import { X, Filter, Moon, Sun } from "lucide-react";
 
 export default function Dashboard() {
   const [profiles, setProfiles] = useState<ContactProfile[]>([]);
@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedProfile, setSelectedProfile] = useState<ContactProfile | null>(null);
   const [sortByDate, setSortByDate] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   // Initialize profiles
@@ -95,7 +96,7 @@ export default function Dashboard() {
     setProfiles(prevProfiles =>
       prevProfiles.map(profile => {
         if (profile.id === profileId) {
-          const now = new Date().toISOString().split('T')[0];
+          const now = new Date().toISOString().split("T")[0];
           return {
             ...profile,
             responded: !profile.responded,
@@ -119,18 +120,35 @@ export default function Dashboard() {
 
   // Format date to more readable format
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div
+      className={`min-h-screen transition-colors ${
+        darkMode ? "bg-black text-white" : "bg-background"
+      }`}
+    >
       <Navigation />
 
       <main className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Outreach Dashboard</h1>
-          <p className="text-muted-foreground">Track and manage your network connections</p>
+        <div className="mb-8 flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Outreach Dashboard</h1>
+            <p className="text-muted-foreground">
+              Track and manage your network connections
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setDarkMode(!darkMode)}
+            className="inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium hover:bg-accent transition-colors"
+          >
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{darkMode ? "Light mode" : "Dark mode"}</span>
+          </button>
         </div>
 
         {/* Metrics Cards */}
@@ -198,12 +216,15 @@ export default function Dashboard() {
               </SelectContent>
             </Select>
           </div>
+
           <button
             onClick={() => setSortByDate(!sortByDate)}
-            className={`p-2 h-9 rounded-md border ${sortByDate ? 'bg-muted border-primary' : 'bg-background border-input'} hover:bg-accent transition-colors`}
+            className={`p-2 h-9 rounded-md border ${
+              sortByDate ? "bg-muted border-primary" : "bg-background border-input"
+            } hover:bg-accent transition-colors`}
             title="Sort by contact date"
           >
-            <Filter size={20} className={sortByDate ? 'text-primary' : 'text-muted-foreground'} />
+            <Filter size={20} className={sortByDate ? "text-primary" : "text-muted-foreground"} />
           </button>
         </div>
 
@@ -215,7 +236,7 @@ export default function Dashboard() {
             <TabsTrigger value="not_responded">Not Responded</TabsTrigger>
           </TabsList>
 
-          <TabsContent value={activeTab}>
+          <TabsContent value="all">
             <div className="space-y-6">
               {filteredProfiles.length === 0 ? (
                 <div className="text-center py-12">
@@ -422,4 +443,4 @@ export default function Dashboard() {
       </AnimatePresence>
     </div>
   );
-} 
+}
