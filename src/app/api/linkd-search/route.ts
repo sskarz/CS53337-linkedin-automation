@@ -42,21 +42,23 @@ export async function POST(request: Request) {
     // If we have a query, use it directly
     if (generatedQuery) {
       console.log(`[${new Date().toISOString()}] [linkd-search API] Using provided query: "${generatedQuery}"`);
-      
-      // Only include school in search parameters if alumniOnly is true
-      const schools = alumniOnly ? [userProfile.universityName] : [];
-      
-      if (schools.length > 0) {
-        console.log(`[${new Date().toISOString()}] [linkd-search API] Searching for schools: ${schools.join(', ')}`);
+
+      // Modify the query to include school name if alumniOnly is true
+      // This is more flexible than using the schools parameter
+      let finalQuery = generatedQuery;
+      if (alumniOnly && userProfile.universityName) {
+        // Remove comma from school name for better matching (e.g., "California State University, Los Angeles" -> "California State University Los Angeles")
+        const schoolName = userProfile.universityName.replace(',', '');
+        finalQuery = `${generatedQuery} from ${schoolName}`;
+        console.log(`[${new Date().toISOString()}] [linkd-search API] Modified query for alumni search: "${finalQuery}"`);
       } else {
         console.log(`[${new Date().toISOString()}] [linkd-search API] Not filtering by school (alumni-only disabled)`);
       }
-      
-      // Use the direct search with the generated query
+
+      // Use the direct search with the final query (no schools parameter)
       searchResults = await searchUsers({
-        query: generatedQuery,
-        limit: limit || 10,
-        schools: schools
+        query: finalQuery,
+        limit: limit || 10
       });
     } else {
       console.log(`[${new Date().toISOString()}] [linkd-search API] No query provided`);

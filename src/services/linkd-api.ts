@@ -107,13 +107,21 @@ export const searchUsers = async (params: SearchParams): Promise<SearchResponse>
     // Add auth token if available (API keys should start with 'lk_')
     if (authToken) {
       headers['Authorization'] = `Bearer ${authToken}`;
+
+      // Warn if API key doesn't start with expected prefix
+      if (!authToken.startsWith('lk_')) {
+        console.warn(`[${new Date().toISOString()}] [linkd-api] Warning: API key does not start with 'lk_' as documented. Current prefix: ${authToken.substring(0, 3)}...`);
+      }
     } else {
       console.warn(`[${new Date().toISOString()}] [linkd-api] Warning: No auth token provided`);
     }
     
     // Make the request
+    const requestUrl = `${API_BASE_URL}/api/search?${queryParams.toString()}`;
+    console.log(`[${new Date().toISOString()}] [linkd-api] Request URL: ${requestUrl}`);
+
     const response = await fetch(
-      `${API_BASE_URL}/api/search?${queryParams.toString()}`,
+      requestUrl,
       {
         method: 'GET',
         headers,
@@ -143,10 +151,22 @@ export const searchUsers = async (params: SearchParams): Promise<SearchResponse>
     }
     
     // Parse and return successful response
-    const result = await response.json() as SearchResponse;
+    const result = await response.json();
+
+    // Validate response structure
+    if (!result.results || !Array.isArray(result.results)) {
+      console.warn(`[${new Date().toISOString()}] [linkd-api] Unexpected response structure:`, JSON.stringify(result, null, 2));
+      throw new Error('API returned unexpected response format');
+    }
+
     console.log(`[${new Date().toISOString()}] [linkd-api] Found ${result.results.length} profiles`);
-    
-    return result;
+
+    // Add detailed logging when no results are found
+    if (result.results.length === 0) {
+      console.log(`[${new Date().toISOString()}] [linkd-api] No profiles found. Query: "${query}". Total: ${result.total || 0}. Full response:`, JSON.stringify(result, null, 2));
+    }
+
+    return result as SearchResponse;
     
   } catch (error) {
     console.error(`[${new Date().toISOString()}] [linkd-api] Error:`, error);

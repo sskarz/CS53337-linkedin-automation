@@ -43,9 +43,15 @@ export async function generateLinkedInQuery(userProfile: any, userObjective: str
       `,
     });
     
-    const generatedQuery = response.text;
+    const generatedQuery = response.text.trim();
+
+    // Validate that query is non-empty after trimming
+    if (!generatedQuery) {
+      throw new Error('Generated query is empty after trimming');
+    }
+
     console.log(`[${new Date().toISOString()}] [gemini-api] Generated query: "${generatedQuery}"`);
-    
+
     return generatedQuery;
   } catch (error) {
     console.error(`[${new Date().toISOString()}] [gemini-api] Error:`, error);
