@@ -77,7 +77,7 @@ export const searchUsers = async (params: SearchParams): Promise<SearchResponse>
   }
   
   try {
-    const { query, limit = 10, schools, companies, advanced_filtering = true } = params;
+    const { query, limit = 5, schools, companies, advanced_filtering = true } = params;
     
     // Build query parameters
     const queryParams = new URLSearchParams();

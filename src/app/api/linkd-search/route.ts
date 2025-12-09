@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     // Parse request body
     const body = await request.json();
     const { userProfile, userObjective, limit, generatedQuery, alumniOnly = true } = body;
-    
+
     console.log(`[${new Date().toISOString()}] [linkd-search API] Request body parsed. Looking for: ${generatedQuery}`);
     console.log(`[${new Date().toISOString()}] [linkd-search API] Requested limit: ${limit}`);
     console.log(`[${new Date().toISOString()}] [linkd-search API] Alumni only: ${alumniOnly}`);

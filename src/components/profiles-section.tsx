@@ -4,11 +4,9 @@ import { UserResult } from "@/services/linkd-api";
 
 interface ProfilesSectionProps {
   profiles: UserResult[];
-  limit: string;
 }
 
-export function ProfilesSection({ profiles, limit }: ProfilesSectionProps) {
-  const displayedProfiles = profiles.slice(0, parseInt(limit));
+export function ProfilesSection({ profiles }: ProfilesSectionProps) {
 
   if (profiles.length === 0) {
     return null;
@@ -24,7 +22,7 @@ export function ProfilesSection({ profiles, limit }: ProfilesSectionProps) {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {displayedProfiles.map((profile, index) => (
+        {profiles.map((profile, index) => (
           <ProfileCard key={`${profile.profile.id}-${index}`} profile={profile} />
         ))}
       </div>

@@ -6,7 +6,7 @@ import { SearchForm } from "@/components/search-form";
 import { ProfilesSection } from "@/components/profiles-section";
 import { MessagesSection } from "@/components/messages-section";
 import { UserResult } from "@/services/linkd-api";
-import { OutreachMessage, runLinkedInOutreach, runGmailOutreach } from "@/app/stagehand/main";
+import { OutreachMessage, runLinkedInOutreach } from "@/app/stagehand/main";
 import Image from "next/image";
 import { motion, stagger, useAnimate } from "framer-motion";
 
@@ -73,14 +73,11 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false);
   const [isGeneratingMessages, setIsGeneratingMessages] = useState(false);
   const [isSendingMessages, setIsSendingMessages] = useState(false);
-  const [isEmailingMessages, setIsEmailingMessages] = useState(false);
   const [profiles, setProfiles] = useState<UserResult[]>([]);
   const [generatedMessages, setGeneratedMessages] = useState<Record<string, string>>({});
   const [messages, setMessages] = useState<OutreachMessage[]>([]);
-  const [limit, setLimit] = useState<string>("5");
   const [searchQuery, setSearchQuery] = useState("");
   const [userProfile, setUserProfile] = useState(getUserProfileFromStorage());
-  const [alumniOnly, setAlumniOnly] = useState<boolean>(true);
   const [showBackground, setShowBackground] = useState(true);
   
   // Simple bubble state type
@@ -246,9 +243,9 @@ export default function Home() {
         body: JSON.stringify({
           userProfile: latestProfile,
           userObjective: prompt,
-          limit: parseInt(limit),
+          limit: 10,
           generatedQuery: generatedQuery,
-          alumniOnly: alumniOnly
+          alumniOnly: false
         }),
       });
       
@@ -271,7 +268,7 @@ export default function Home() {
       setIsGeneratingMessages(true);
       const foundProfiles = searchData.results || [];
       if (foundProfiles.length > 0) {
-        const profilesForMessages = foundProfiles.slice(0, Math.min(parseInt(limit), foundProfiles.length));
+        const profilesForMessages = foundProfiles.slice(0, Math.min(10, foundProfiles.length));
         console.log(`[${new Date().toISOString()}] [page] Starting message generation for ${profilesForMessages.length} profiles`);
         await generateMessagesForProfiles(profilesForMessages);
       }
@@ -469,29 +466,6 @@ export default function Home() {
     }
   };
 
-  const handleEmailAllMessages = async () => {
-    try {
-      if (messages.length === 0) {
-        throw new Error("No messages to email");
-      }
-      
-      setIsEmailingMessages(true);
-      
-      // Call the runGmailOutreach function from stagehand/main
-      const success = await runGmailOutreach(messages);
-      
-      if (success) {
-        alert("Emails drafted successfully!");
-      } else {
-        throw new Error("Failed to create email drafts");
-      }
-    } catch (error) {
-      console.error("Error creating email drafts:", error);
-      alert("Error creating email drafts: " + (error instanceof Error ? error.message : String(error)));
-    } finally {
-      setIsEmailingMessages(false);
-    }
-  };
 
   return (
     <div className={`flex flex-col min-h-screen ${showBackground ? 'bg-gradient-to-t from-yellow-950/70 via-yellow-950/20 to-white' : 'bg-white'}`}>
@@ -546,13 +520,9 @@ export default function Home() {
             Find and connect with anybody, your way
           </motion.p>
           
-          <SearchForm 
+          <SearchForm
             prompt={prompt}
             setPrompt={setPrompt}
-            limit={limit}
-            setLimit={setLimit}
-            alumniOnly={alumniOnly}
-            setAlumniOnly={setAlumniOnly}
             handleSubmit={handleSubmit}
             isLoading={isLoading}
             isSearching={isSearching}
@@ -576,19 +546,16 @@ export default function Home() {
         </div>
         
         {/* LinkedIn Profiles Section */}
-        <ProfilesSection profiles={profiles} limit={limit} />
-        
+        <ProfilesSection profiles={profiles} />
+
         {/* Generated Messages Section */}
-        <MessagesSection 
+        <MessagesSection
           profiles={profiles}
-          limit={limit}
           generatedMessages={generatedMessages}
           onMessageChange={handleMessageChange}
           onRegenerateMessage={handleRegenerateMessage}
           onSendAll={handleSendAllMessages}
-          onEmailAll={handleEmailAllMessages}
           isSendingMessages={isSendingMessages}
-          isEmailingMessages={isEmailingMessages}
         />
       </div>
     </div>
